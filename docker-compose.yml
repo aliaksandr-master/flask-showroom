@@ -1,0 +1,34 @@
+version: '3.7'
+
+networks:
+    app_network: {}
+
+services:
+    app:
+        build: .
+        ports:
+            - 5000:5000
+        volumes:
+            - .:/code
+        depends_on:
+            - app_db
+        networks:
+            - app_network
+
+    app_db:
+        image: redis
+        networks:
+            - app_network
+ 
+    app_webserver:
+        image: nginx:1.15-alpine
+        restart: always
+        volumes:
+            - ./conf.d:/etc/nginx/conf.d
+        ports:
+            - 5080:80
+        command: [nginx-debug, '-g', 'daemon off;']
+        depends_on:
+            - app
+        networks:
+            - app_network
